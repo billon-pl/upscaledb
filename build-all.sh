@@ -9,6 +9,7 @@
 ./configure --disable-remote --disable-java  --disable-simd --disable-encryption || exit 1
 make -j5 || exit 1
 cd unittests && make plugin || exit 1
+cd ..
 make test || exit 1
 
 #lcov --directory . --capture --output-file ./code_coverage.info -rc lcov_branch_coverage=1

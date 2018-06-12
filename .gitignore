@@ -23,3 +23,7 @@ install-sh
 ar-lib
 missing
 *.tar.gz
+m4/*
+!m4/ax_cxx_gcc_abi_demangle.m4
+!m4/boost.m4
+
