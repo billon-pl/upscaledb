@@ -9,7 +9,7 @@ testdb*
 .libs
 .deps
 test
-.test*
+!data/test
 *.db
 *.db.*
 xxx*.log*
