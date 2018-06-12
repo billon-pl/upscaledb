@@ -1,5 +1,6 @@
 issue32
 issue43
+issue101
 testdb*
 *.o
 *.lo
@@ -8,7 +9,7 @@ testdb*
 .libs
 .deps
 test
-.test*
+!data/test
 *.db
 *.db.*
 xxx*.log*

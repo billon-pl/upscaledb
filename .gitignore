@@ -15,7 +15,6 @@ config.status
 configure
 libtool
 stamp-h1
-m4
 config.guess
 config.sub
 depcomp
@@ -24,3 +23,7 @@ install-sh
 ar-lib
 missing
 *.tar.gz
+m4/*
+!m4/ax_cxx_gcc_abi_demangle.m4
+!m4/boost.m4
+
