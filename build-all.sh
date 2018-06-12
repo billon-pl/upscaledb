@@ -10,7 +10,13 @@ export CFLAGS="-g -O0 -fprofile-arcs -ftest-coverage"
 export CXXFLAGS="-g -O0 -fprofile-arcs -ftest-coverage"
 export LDFLAGS="-fprofile-arcs"
 
-./configure --disable-remote --disable-java  --disable-simd --disable-encryption || exit 1
+./configure \
+    --disable-remote \
+    --disable-java  \
+    --disable-simd \
+    --disable-encryption \
+    --enable-dependency-tracking || exit 1
+    
 make -j5 || exit 1
 cd unittests && make plugin || exit 1
 cd ..
