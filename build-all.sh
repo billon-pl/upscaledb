@@ -1,12 +1,14 @@
 #!/bin/bash
 
 ./bootstrap.sh || exit 1
-export CFLAGS="-Wall -Wpedantic -Wextra -g -O0 -fprofile-arcs -ftest-coverage"
-export CXXFLAGS="-Wall -Wpedantic -Wextra -g -O0 -fprofile-arcs -ftest-coverage"
-export LDFLAGS="-fprofile-arcs"
+# export CFLAGS="-Wall -Wpedantic -Wextra -g -O0 -fprofile-arcs -ftest-coverage"
+# export CXXFLAGS="-Wall -Wpedantic -Wextra -g -O0 -fprofile-arcs -ftest-coverage"
+# export LDFLAGS="-fprofile-arcs"
 # ./configure --disable-remote --disable-java  --disable-simd --disable-encryption --enable-debug || exit 1
+
 ./configure --disable-remote --disable-java  --disable-simd --disable-encryption || exit 1
 make -j5 || exit 1
+cd unittests && make plugin || exit 1
 make test || exit 1
 
 #lcov --directory . --capture --output-file ./code_coverage.info -rc lcov_branch_coverage=1
