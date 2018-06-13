@@ -16,6 +16,7 @@ if( !st ) \
 }
 
 void fill_db(ups_db_t* db, unsigned int item_count);
+void check_cursor(ups_db_t* db);
 
 
 int main()
@@ -41,26 +42,8 @@ int main()
 
     const unsigned int item_count = 57; // required
     fill_db(db, item_count);
+    check_cursor(db);
 
-
-    ups_cursor_t* cur = nullptr;
-    st = ups_cursor_create(&cur, db, 0, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_create" );
-
-    unsigned int key_data = 0;
-    ups_key_t key = {0};
-    key.data = &key_data;
-    key.size = sizeof(key_data);
-    ups_record_t rec = {0};
-
-    st = ups_cursor_move(cur, &key, &rec, UPS_CURSOR_FIRST);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_move, UPS_CURSOR_FIRST" );
-
-    st = ups_cursor_move(cur, &key, &rec, UPS_CURSOR_PREVIOUS);
-    EXPECT_TRUE( st != UPS_SUCCESS, "Cursor moved from FIRST to PREVIOUS without UPS_KEY_NOT_FOUND" );
-
-    st = ups_cursor_close(cur);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
 
     st = ups_db_close(db, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
@@ -84,4 +67,31 @@ void fill_db(ups_db_t* db, unsigned int item_count)
 
 }
 
+//
+//
+//
+void check_cursor(ups_db_t* db)
+{
+    ups_status_t st = UPS_INV_PARAMETER;
+    ups_cursor_t* cur = nullptr;
 
+    st = ups_cursor_create(&cur, db, 0, 0);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_create" );
+
+    unsigned int key_data = 0;
+    ups_key_t key = {0};
+    key.data = &key_data;
+    key.size = sizeof(key_data);
+    ups_record_t rec = {0};
+
+    st = ups_cursor_move(cur, &key, &rec, UPS_CURSOR_FIRST);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_move, UPS_CURSOR_FIRST" );
+
+    st = ups_cursor_move(cur, &key, &rec, UPS_CURSOR_PREVIOUS);
+    EXPECT_TRUE( st != UPS_SUCCESS, "Cursor moved from FIRST to PREVIOUS without UPS_KEY_NOT_FOUND" );
+
+    st = ups_cursor_close(cur);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
+
+
+}
