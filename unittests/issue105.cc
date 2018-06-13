@@ -27,8 +27,6 @@ void close_env( ups_env_t *env, ups_db_t* db );
 int main()
 {
     const unsigned int query = 0;
-
-
     const unsigned int item_count = 50;
 
     for( unsigned int n = 2; n < item_count; n++ )
@@ -62,6 +60,7 @@ ups_db_t* create_env( ups_env_t **env )
     ups_parameter_t params[] =
     {
         { UPS_PARAM_KEY_TYPE, UPS_TYPE_UINT32 },
+        { UPS_PARAM_RECORD_SIZE, 0 },
         { 0, }
     };
 
@@ -77,12 +76,14 @@ ups_db_t* create_env( ups_env_t **env )
 //
 void fill_db( ups_db_t* db, unsigned int item_count )
 {
-    for( unsigned int i = 0; i < item_count; i++ )
+    for( unsigned int n = 0; n < item_count; n++ )
     {
-        ups_key_t key = ups_make_key(&i, sizeof(i));
-        ups_record_t record = {0};
+        ups_key_t key = ups_make_key( &n, sizeof( n ) );
 
-        const ups_status_t st = ups_db_insert(db, 0, &key, &record, 0);
+        ups_record_t record;
+        bzero( &record, sizeof( record ) );
+
+        const ups_status_t st = ups_db_insert( db, 0, &key, &record, 0 );
         EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
     }
 }
