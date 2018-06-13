@@ -100,10 +100,11 @@ void check_cursor(ups_db_t* db)
     st = ups_cursor_create(&cur, db, 0, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_create" );
 
-    unsigned int key_data = 0;
-    ups_key_t key = {0};
-    key.data = &key_data;
-    key.size = sizeof(key_data);
+    unsigned int query = 0;
+    ups_key_t key = ups_make_key( &query, sizeof( query ) );
+//    ups_key_t key = {0};
+//    key.data = &key_data;
+//    key.size = sizeof(key_data);
     ups_record_t rec = {0};
 
     st = ups_cursor_move(cur, &key, &rec, UPS_CURSOR_FIRST);
