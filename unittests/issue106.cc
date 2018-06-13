@@ -59,13 +59,14 @@ int main()
     {
         //
         // This statement causes the problem
-        // required to reproduce
         //
-        // ups_cursor_move(cur, &key, &rec, 0);
+        // ups_cursor_move( cur, &key, &rec, UPS_CURSOR_FIRST );
+
         EXPECT_TRUE( counter == *reinterpret_cast< unsigned int* >( key.data ), "Invalid data" );
         counter++;
     }
     while( UPS_SUCCESS == ups_cursor_move( cur, &key, &rec, UPS_CURSOR_NEXT ) );
+    EXPECT_TRUE( counter == item_count, "Cursor does not contain all data" );
 
     st = ups_cursor_close( cur );
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
