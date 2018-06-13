@@ -1,6 +1,7 @@
 issue32
 issue43
 issue101
+issue107
 testdb*
 *.o
 *.lo
@@ -17,3 +18,6 @@ xxx*.log*
 recovery
 valgrind-out.txt
 plugin.so
+*.gcda
+*.gcno
+

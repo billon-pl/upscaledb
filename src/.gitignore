@@ -6,3 +6,6 @@
 .dirstamp
 messages.pb.cc
 messages.pb.h
+*.gcda
+*.gcno
+
