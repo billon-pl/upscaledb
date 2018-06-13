@@ -15,6 +15,7 @@ if( !st )                          \
     exit( 1 );                     \
 }
 
+void insert_db( ups_db_t* db, unsigned int item_count );
 
 int main()
 {
@@ -33,53 +34,41 @@ int main()
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create_db" );
 
     const unsigned int item_count = 50;
+    insert_db( db, item_count );
 
-    for (unsigned int i = 0; i < item_count; i++)
-    {
-        ups_key_t key = ups_make_key(&i, sizeof(i));
-        ups_record_t record = {0};
 
-        st = ups_db_insert(db, 0, &key, &record, 0);
-        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
-    }
+    unsigned int query = 0;
 
-    for(unsigned int i = 0; i < item_count / 2; i++)
-    {
-        ups_key_t key = ups_make_key(&i, sizeof(i));
+    ups_key_t key = ups_make_key( &query, sizeof( query ) );
+    st = ups_db_erase(db, 0, &key, 0);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
 
-        st = ups_db_erase(db, 0, &key, 0);
-        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
-    }
 
-    uint64_t count = 0;
-    st = ups_db_count(db,0, 0, &count);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_count" );
 
-    if(count != item_count / 2){
-        std::cout << "Item count after delete: " << count << std::endl;
-    }
+    key = ups_make_key( &query, sizeof( query ) );
+    ups_record_t record = {0};
 
-    for(unsigned int i = 0; i < item_count / 2; i++)
-    {
-        ups_key_t key = ups_make_key(&i, sizeof(i));
-        ups_record_t record = {0};
+    st = ups_db_find(db, 0, &key, &record, UPS_FIND_GEQ_MATCH);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_find" );
 
-        ups_cursor_t* cursor;
-        st = ups_cursor_create(&cursor, db, 0, 0);
-        EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_create" );
-        ups_status_t st = ups_cursor_find(cursor, &key, &record, UPS_FIND_GEQ_MATCH);
-        //ups_status_t st = ups_db_find(db, 0, &key, &record, UPS_FIND_GEQ_MATCH);
+    EXPECT_TRUE( 0 != *reinterpret_cast< unsigned int* >( key.data ), "Key not deleted" );
 
-        if(st == UPS_SUCCESS && *reinterpret_cast<int*>(key.data) == i){
-            std::cout << "Found deleted item: " << i << std::endl;
-        }
-
-        st = ups_cursor_close(cursor);
-        EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
-    }
 
     st = ups_db_close(db, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
 
     return 0;
+}
+
+void insert_db( ups_db_t* db, unsigned int item_count )
+{
+    for( unsigned int i = 0; i < item_count; i++ )
+    {
+        ups_key_t key = ups_make_key(&i, sizeof(i));
+        ups_record_t record = {0};
+
+        const ups_status_t st = ups_db_insert(db, 0, &key, &record, 0);
+        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
+    }
+
 }
