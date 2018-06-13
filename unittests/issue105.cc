@@ -15,32 +15,23 @@ if( !st )                          \
     exit( 1 );                     \
 }
 
-void insert_db( ups_db_t* db, unsigned int item_count );
+ups_db_t* create_env( ups_env_t **env );
+void fill_db( ups_db_t* db, unsigned int item_count );
 
 int main()
 {
-    ups_env_t* env;
-    ups_status_t st = ups_env_create(&env, "test.db", UPS_ENABLE_TRANSACTIONS, 0664, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create" );
-    //ups_env_create(&env, "test.db", 0, 0664, 0);
+    ups_env_t* env = nullptr;
+    ups_db_t* db = create_env( &env );
 
-    ups_parameter_t params[] = {
-    {UPS_PARAM_KEY_TYPE, UPS_TYPE_UINT32},
-    {0, }
-    };
-
-    ups_db_t* db;
-    st = ups_env_create_db(env, &db, 1, 0, &params[0]);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create_db" );
 
     const unsigned int item_count = 50;
-    insert_db( db, item_count );
+    fill_db( db, item_count );
 
 
     unsigned int query = 0;
 
     ups_key_t key = ups_make_key( &query, sizeof( query ) );
-    st = ups_db_erase(db, 0, &key, 0);
+    ups_status_t st = ups_db_erase(db, 0, &key, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
 
 
@@ -60,7 +51,34 @@ int main()
     return 0;
 }
 
-void insert_db( ups_db_t* db, unsigned int item_count )
+//
+//
+//
+ups_db_t* create_env( ups_env_t **env )
+{
+    const std::string db_name( "test.db" );
+    const uint32_t mode = 0664;
+
+    ups_status_t st = ups_env_create( env, db_name.c_str(), UPS_ENABLE_TRANSACTIONS, mode, 0 );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create, UPS_ENABLE_TRANSACTIONS" );
+
+    ups_parameter_t params[] =
+    {
+        { UPS_PARAM_KEY_TYPE, UPS_TYPE_UINT32 },
+        { 0, }
+    };
+
+    ups_db_t* db = nullptr;
+    st = ups_env_create_db( *env, &db, 1, 0, &params[ 0 ] );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create_db" );
+
+    return db;
+}
+
+//
+//
+//
+void fill_db( ups_db_t* db, unsigned int item_count )
 {
     for( unsigned int i = 0; i < item_count; i++ )
     {
