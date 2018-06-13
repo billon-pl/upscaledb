@@ -69,18 +69,15 @@ int main()
     do
     {
         ups_cursor_t* cur;
-        if(UPS_SUCCESS != (st =ups_cursor_create(&cur, db_1, 0, 0)))
-        {
-            std::cout << "Cursor create error " << st;
-        }
+        st = ups_cursor_create(&cur, db_1, 0, 0);
+        if( UPS_SUCCESS != st ) { std::cout << "Cursor create error " << st; return 1; }
         unsigned int query = 0;
 
         ups_key_t key_find = ups_make_key(&query, sizeof(query));
 
-        if((st = ups_cursor_find(cur, &key_find, 0, UPS_FIND_GEQ_MATCH)) != UPS_SUCCESS) // won't return in second iteration
-        {
-            std::cout << "Find error " << st;
-        }
+        st = ups_cursor_find(cur, &key_find, 0, UPS_FIND_GEQ_MATCH);
+        // won't return in second iteration
+        if(st != UPS_SUCCESS) { std::cout << "Find error " << st; return 1; }
 
         ups_key_t key_move = {0};
 
@@ -90,21 +87,15 @@ int main()
         {
             ups_record_t record = {0};
 
-            if(UPS_SUCCESS != (st = ups_db_insert(db_2, 0, &key_move, &record, 0)))
-            {
-                std::cout << "Insert error " << st;
-            }
+            st = ups_db_insert(db_2, 0, &key_move, &record, 0);
+            if(UPS_SUCCESS != st) { std::cout << "Insert error " << st; return 1; }
 
-            if(UPS_SUCCESS != (st = ups_db_erase(db_1, 0, &key_move, 0)))
-            {
-                std::cout << "Erase error " << st;
-            }
+            st = ups_db_erase(db_1, 0, &key_move, 0);
+            if(UPS_SUCCESS != st) { std::cout << "Erase error " << st; return 1; }
         }
 
-        if(UPS_SUCCESS != (st = ups_cursor_close(cur)))
-        {
-            std::cout << "Cursor close error " << st;
-        }
+        st = ups_cursor_close(cur);
+        if( UPS_SUCCESS != st ) { std::cout << "Cursor close error " << st; return 1; }
 
     }while((db_size -= bulk_size) > 0);
 
