@@ -22,9 +22,9 @@ int main()
     ups_db_t* db;
     ups_env_create_db(env, &db, 1, 0, &params[0]);
 
-    const int item_count = 57; // required
+    const unsigned int item_count = 57; // required
 
-    for (int i = 0; i < item_count; i++)
+    for (unsigned int i = 0; i < item_count; i++)
     {
         ups_key_t key = ups_make_key(&i, sizeof(i));
         ups_record_t record = {0};
