@@ -1,5 +1,5 @@
-noinst_PROGRAMS = test recovery issue32 issue43 issue101
-noinst_BIN = test recovery issue32 issue43 issue101
+noinst_PROGRAMS = test recovery issue32 issue43 issue101 plugin
+noinst_BIN = test recovery issue32 issue43 issue101 plugin
 
 EXTRA_DIST      = recovery.pl valgrind.supp data/* plugin.cc
 
