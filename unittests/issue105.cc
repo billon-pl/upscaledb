@@ -8,12 +8,6 @@
 #include <ups/upscaledb.hpp>
 #include <cstdlib>
 
-#define EXPECT_TRUE( st, txt )     \
-if( !st )                          \
-{                                  \
-    std::cout << txt << std::endl; \
-    exit( 1 );                     \
-}
 
 int main()
 {
