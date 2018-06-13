@@ -51,7 +51,11 @@ ups_db_t* create_env( ups_env_t **env )
     const std::string db_name( "test.db" );
     const uint32_t mode = 0664;
 
-    ups_status_t st = ups_env_create( env, db_name.c_str(), UPS_ENABLE_TRANSACTIONS, mode, 0 );
+    // const uint32_t flags = 0;
+    // const uint32_t flags = UPS_ENABLE_TRANSACTIONS | UPS_ENABLE_FSYNC | UPS_DISABLE_MMAP | UPS_DISABLE_RECOVERY;
+    const uint32_t flags = UPS_ENABLE_TRANSACTIONS;
+
+    ups_status_t st = ups_env_create( env, db_name.c_str(), flags, mode, 0 );
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create, UPS_ENABLE_TRANSACTIONS" );
 
     //ups_status_t st = ups_env_create( env, db_name.c_str(), 0, mode, 0 );
