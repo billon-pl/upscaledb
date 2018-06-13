@@ -48,7 +48,6 @@ test:
 	             && ./issue32 -r \
 	             && ./issue43    \
 	             && ./issue101   \
-	             && ./issue105   \
 	             && ./issue106   \
 	             && ./issue107
 if ENABLE_JAVA
