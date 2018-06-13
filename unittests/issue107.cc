@@ -15,6 +15,9 @@ if( !st ) \
     exit(1); \
 }
 
+void fill_db(ups_db_t* db, unsigned int item_count);
+
+
 int main()
 {
     ups_status_t st = UPS_INV_PARAMETER;
@@ -37,15 +40,8 @@ int main()
 
 
     const unsigned int item_count = 57; // required
+    fill_db(db, item_count);
 
-    for (unsigned int i = 0; i < item_count; i++)
-    {
-        ups_key_t key = ups_make_key(&i, sizeof(i));
-        ups_record_t record = {0};
-
-        st = ups_db_insert(db, 0, &key, &record, 0);
-        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
-    }
 
     ups_cursor_t* cur = nullptr;
     st = ups_cursor_create(&cur, db, 0, 0);
@@ -71,4 +67,21 @@ int main()
 
     return 0;
 }
+
+//
+//
+//
+void fill_db(ups_db_t* db, unsigned int item_count)
+{
+    for (unsigned int i = 0; i < item_count; i++)
+    {
+        ups_key_t key = ups_make_key(&i, sizeof(i));
+        ups_record_t record = {0};
+
+        const ups_status_t st = ups_db_insert(db, 0, &key, &record, 0);
+        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
+    }
+
+}
+
 
