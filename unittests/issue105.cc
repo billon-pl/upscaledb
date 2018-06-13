@@ -17,6 +17,7 @@ if( !st )                          \
 
 ups_db_t* create_env( ups_env_t **env );
 void fill_db( ups_db_t* db, unsigned int item_count );
+void erase_key( ups_db_t* db, unsigned int query );
 
 int main()
 {
@@ -27,19 +28,19 @@ int main()
     const unsigned int item_count = 50;
     fill_db( db, item_count );
 
-
     unsigned int query = 0;
+    erase_key( db, query );
+
+
+
+
+
+
 
     ups_key_t key = ups_make_key( &query, sizeof( query ) );
-    ups_status_t st = ups_db_erase(db, 0, &key, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
-
-
-
-    key = ups_make_key( &query, sizeof( query ) );
     ups_record_t record = {0};
 
-    st = ups_db_find(db, 0, &key, &record, UPS_FIND_GEQ_MATCH);
+    ups_status_t st = ups_db_find(db, 0, &key, &record, UPS_FIND_GEQ_MATCH);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_find" );
 
     EXPECT_TRUE( 0 != *reinterpret_cast< unsigned int* >( key.data ), "Key not deleted" );
@@ -89,4 +90,14 @@ void fill_db( ups_db_t* db, unsigned int item_count )
         EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
     }
 
+}
+
+//
+//
+//
+void erase_key( ups_db_t* db, unsigned int query )
+{
+    ups_key_t key = ups_make_key( &query, sizeof( query ) );
+    const ups_status_t st = ups_db_erase(db, 0, &key, 0);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
 }
