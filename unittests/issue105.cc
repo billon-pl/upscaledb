@@ -19,25 +19,24 @@ ups_db_t* create_env( ups_env_t **env );
 void fill_db( ups_db_t* db, unsigned int item_count );
 void erase_key( ups_db_t* db, unsigned int query );
 void find_key( ups_db_t* db, unsigned int query );
+void close_env( ups_env_t *env, ups_db_t* db );
 
+//
+//
+//
 int main()
 {
     ups_env_t* env = nullptr;
     ups_db_t* db = create_env( &env );
-
 
     const unsigned int item_count = 50;
     fill_db( db, item_count );
 
     const unsigned int query = 0;
     erase_key( db, query );
-
-
     find_key( db, query );
 
-    const ups_status_t st = ups_db_close(db, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
-
+    close_env( env, db );
     return 0;
 }
 
@@ -105,4 +104,16 @@ void find_key( ups_db_t* db, unsigned int query )
 
     EXPECT_TRUE( query != *reinterpret_cast< unsigned int* >( key.data ), "Key not deleted" );
 
+}
+
+//
+//
+//
+void close_env( ups_env_t* env, ups_db_t* db )
+{
+    ups_status_t st = ups_db_close( db, 0 );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
+
+    st = ups_env_close( env, UPS_AUTO_CLEANUP );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_close" );
 }
