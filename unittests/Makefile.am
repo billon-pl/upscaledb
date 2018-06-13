@@ -107,3 +107,5 @@ issue101_LDADD   = $(top_builddir)/src/libupscaledb.la
 
 plugin: plugin.cc
 	$(CXX) -fPIC -shared -o plugin.so plugin.cc $(AM_CPPFLAGS)
+
+
