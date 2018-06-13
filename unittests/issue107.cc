@@ -15,24 +15,26 @@ if( !st ) \
     exit(1); \
 }
 
-ups_db_t* create_db( ups_env_t** env, bool enable_transactions );
-void fill_db(ups_db_t* db, unsigned int item_count);
-void check_cursor(ups_db_t* db);
+ups_db_t* create_env( ups_env_t** env, bool enable_transactions );
+void fill_db( ups_db_t* db, unsigned int item_count );
+void check_cursor( ups_db_t* db );
+void close_env( ups_env_t *env, ups_db_t* db );
 
 
 int main()
 {
-    ups_env_t* env = nullptr;
-    ups_db_t* db = create_db( &env, true );
-
-
     const unsigned int item_count = 57; // required
-    fill_db( db, item_count );
-    check_cursor( db );
+    for( unsigned int cnt = 5; cnt <= item_count; cnt++ )
+    {
 
+        std::cout << "cnt = " << cnt << std::endl;
 
-    ups_status_t st = ups_db_close(db, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
+        ups_env_t* env = nullptr;
+        ups_db_t* db = create_env( &env, true );
+        fill_db( db, cnt );
+        check_cursor( db );
+        close_env( env, db );
+    }
 
     return 0;
 }
@@ -40,7 +42,7 @@ int main()
 //
 //
 //
-ups_db_t* create_db( ups_env_t **env, bool enable_transactions )
+ups_db_t* create_env( ups_env_t **env, bool enable_transactions )
 {
     const std::string db_name( "test.db" );
     const uint32_t mode = 0664;
@@ -112,4 +114,16 @@ void check_cursor(ups_db_t* db)
 
     st = ups_cursor_close(cur);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
+}
+
+//
+//
+//
+void close_env(ups_env_t* env, ups_db_t* db)
+{
+    ups_status_t st = ups_db_close(db, 0);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
+
+    st = ups_env_close( env, UPS_AUTO_CLEANUP );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_close" );
 }
