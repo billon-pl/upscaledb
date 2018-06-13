@@ -23,9 +23,9 @@ int main()
     ups_db_t* db;
     ups_env_create_db(env, &db, 1, 0, &params[0]);
 
-    const int item_count = 50;
+    const unsigned int item_count = 50;
 
-    for (int i = 0; i < item_count; i++)
+    for (unsigned int i = 0; i < item_count; i++)
     {
         ups_key_t key = ups_make_key(&i, sizeof(i));
         ups_record_t record = {0};
@@ -33,7 +33,7 @@ int main()
         ups_db_insert(db, 0, &key, &record, 0);
     }
 
-    for(int i = 0; i < item_count / 2; i++)
+    for(unsigned int i = 0; i < item_count / 2; i++)
     {
         ups_key_t key = ups_make_key(&i, sizeof(i));
 
@@ -47,7 +47,7 @@ int main()
         std::cout << "Item count after delete: " << count << std::endl;
     }
 
-    for(int i = 0; i < item_count / 2; i++)
+    for(unsigned int i = 0; i < item_count / 2; i++)
     {
         ups_key_t key = ups_make_key(&i, sizeof(i));
         ups_record_t record = {0};
