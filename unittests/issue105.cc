@@ -35,6 +35,8 @@ int main()
 
         ups_env_t* env = nullptr;
         ups_db_t* db = create_env( &env );
+
+        ups_txn_t *txn = NULL;
         fill_db( db, item_count );
         erase_key( db, query );
         find_key( db, query );
