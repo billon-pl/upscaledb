@@ -21,3 +21,6 @@ server1
 client1
 uqi1
 uqi2
+*.gcda
+*.gcno
+

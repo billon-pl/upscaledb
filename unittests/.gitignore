@@ -17,3 +17,6 @@ xxx*.log*
 recovery
 valgrind-out.txt
 plugin.so
+*.gcda
+*.gcno
+

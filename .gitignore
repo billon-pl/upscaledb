@@ -26,4 +26,6 @@ missing
 m4/*
 !m4/ax_cxx_gcc_abi_demangle.m4
 !m4/boost.m4
+.*.gcda
+.*.gcno
 

@@ -18,10 +18,8 @@ export LDFLAGS="-fprofile-arcs"
     --enable-dependency-tracking || exit 1
     
 make -j5 || exit 1
-cd unittests && make plugin || exit 1
-cd ..
-# make test || exit 1
-make test
+make test || exit 1
+
 
 
 
