@@ -1,5 +1,5 @@
 coverage:
-  precision: 1
+  precision: 0
   round: up
   range: "70...100"
 
