@@ -32,7 +32,7 @@ int main()
     const unsigned int item_count = 570;
     for( unsigned int cnt = 1; cnt <= item_count; cnt++ )
     {
-        std::cout << cnt << "  " << std::flush;
+        // std::cout << cnt << "  " << std::flush;
 
         ups_env_t* env = nullptr;
         ups_db_t* db = create_env( &env, true );
@@ -111,6 +111,9 @@ void check_cursor( ups_db_t* db, int record_value )
     EXPECT_TRUE( rec.data, "rec.data is nullptr" );
     EXPECT_TRUE( *reinterpret_cast< int* >( rec.data ) == record_value, "Wrong record value" );
 
+    //
+    // This statement causes the problem!
+    //
     // st = ups_cursor_move( cur, &key, &rec, UPS_CURSOR_FIRST );
     // EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_move, UPS_CURSOR_FIRST" );
 
