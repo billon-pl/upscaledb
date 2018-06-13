@@ -24,7 +24,7 @@ void close_env( ups_env_t *env, ups_db_t* db );
 int main()
 {
     const unsigned int item_count = 57; // required
-    for( unsigned int cnt = 5; cnt <= item_count; cnt++ )
+    for( unsigned int cnt = 1; cnt <= item_count; cnt++ )
     {
 
         std::cout << "cnt = " << cnt << std::endl;
