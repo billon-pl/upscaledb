@@ -80,7 +80,7 @@ ups_db_t* create_env( ups_env_t **env )
 ups_txn_t* create_txn( ups_env_t* env )
 {
     ups_txn_t* txn = nullptr;
-    ups_status_t st = ups_txn_begin( &txn, env, NULL, NULL, 0 );
+    ups_status_t st = ups_txn_begin( &txn, env, nullptr, nullptr, 0 );
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_txn_begin" );
     return txn;
 }
@@ -91,7 +91,7 @@ ups_txn_t* create_txn( ups_env_t* env )
 //
 void fill_db( ups_db_t* db, ups_txn_t* txn )
 {
-    const uint32_t item_count = 50;
+    const uint32_t item_count = 500;
 
     for( uint32_t n = 0; n < item_count; n++ )
     {
@@ -117,10 +117,10 @@ void erase_key( ups_db_t* db, ups_txn_t* txn, uint32_t query )
 {
     ups_key_t key = ups_make_key( &query, sizeof( query ) );
 
-    ups_status_t st = ups_db_erase(db, txn, &key, 0);
+    ups_status_t st = ups_db_erase( db, txn, &key, 0 );
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase, UPS_SUCCESS" );
 
-    st = ups_db_erase(db, txn, &key, 0);
+    st = ups_db_erase( db, txn, &key, 0 );
     EXPECT_TRUE( st == UPS_KEY_NOT_FOUND, "ups_db_erase, UPS_KEY_NOT_FOUND" );
 
     if( txn )
