@@ -17,8 +17,8 @@ if( !st )                          \
 
 ups_db_t* create_env( ups_env_t** env );
 void fill_db( ups_db_t* db, ups_txn_t* txn );
-void erase_key( ups_db_t* db, ups_txn_t* txn, unsigned int query );
-void find_key( ups_db_t* db, ups_txn_t* txn, unsigned int query );
+void erase_key( ups_db_t* db, ups_txn_t* txn, uint32_t query );
+void find_key( ups_db_t* db, ups_txn_t* txn, uint32_t query );
 void close_env( ups_env_t *env, ups_db_t* db );
 ups_txn_t* create_txn( ups_env_t* env );
 
@@ -27,7 +27,7 @@ ups_txn_t* create_txn( ups_env_t* env );
 //
 int main()
 {
-    const unsigned int query = 0;
+    const uint32_t query = 0;
 
     ups_env_t* env = nullptr;
     ups_db_t* db = create_env( &env );
@@ -91,9 +91,9 @@ ups_txn_t* create_txn( ups_env_t* env )
 //
 void fill_db( ups_db_t* db, ups_txn_t* txn )
 {
-    const unsigned int item_count = 50;
+    const uint32_t item_count = 50;
 
-    for( unsigned int n = 0; n < item_count; n++ )
+    for( uint32_t n = 0; n < item_count; n++ )
     {
         ups_key_t key = ups_make_key( &n, sizeof( n ) );
 
@@ -113,7 +113,7 @@ void fill_db( ups_db_t* db, ups_txn_t* txn )
 //
 //
 //
-void erase_key( ups_db_t* db, ups_txn_t* txn, unsigned int query )
+void erase_key( ups_db_t* db, ups_txn_t* txn, uint32_t query )
 {
     ups_key_t key = ups_make_key( &query, sizeof( query ) );
 
@@ -132,7 +132,7 @@ void erase_key( ups_db_t* db, ups_txn_t* txn, unsigned int query )
 //
 //
 //
-void find_key( ups_db_t* db, ups_txn_t* txn, unsigned int query )
+void find_key( ups_db_t* db, ups_txn_t* txn, uint32_t query )
 {
     ups_key_t key = ups_make_key( &query, sizeof( query ) );
 
@@ -143,9 +143,9 @@ void find_key( ups_db_t* db, ups_txn_t* txn, unsigned int query )
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_find" );
 
 
-    // std::cout << *reinterpret_cast< unsigned int* >( key.data ) << std::endl;
+    // std::cout << *reinterpret_cast< uint32_t* >( key.data ) << std::endl;
 
-    EXPECT_TRUE( query != *reinterpret_cast< unsigned int* >( key.data ), "Key not deleted" );
+    EXPECT_TRUE( query != *reinterpret_cast< uint32_t* >( key.data ), "Key not deleted" );
 }
 
 //
