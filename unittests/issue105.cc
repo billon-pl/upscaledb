@@ -16,7 +16,7 @@ if( !st )                          \
 }
 
 ups_db_t* create_env( ups_env_t** env );
-void fill_db( ups_db_t* db, ups_txn_t* txn, unsigned int item_count );
+void fill_db( ups_db_t* db, ups_txn_t* txn );
 void erase_key( ups_db_t* db, ups_txn_t* txn, unsigned int query );
 void find_key( ups_db_t* db, ups_txn_t* txn, unsigned int query );
 void close_env( ups_env_t *env, ups_db_t* db );
@@ -28,22 +28,17 @@ ups_txn_t* create_txn( ups_env_t* env );
 int main()
 {
     const unsigned int query = 0;
-    const unsigned int item_count = 50;
 
-    for( unsigned int n = 2; n < item_count; n++ )
-    {
-        std::cout << n << "  " << std::flush << std::endl;
+    ups_env_t* env = nullptr;
+    ups_db_t* db = create_env( &env );
 
-        ups_env_t* env = nullptr;
-        ups_db_t* db = create_env( &env );
+    ups_txn_t* txn = create_txn( env );
 
-        ups_txn_t* txn = create_txn( env );
+    fill_db( db, txn );
+    erase_key( db, txn, query );
+    find_key( db, txn, query );
+    close_env( env, db );
 
-        fill_db( db, txn, item_count );
-        erase_key( db, txn, query );
-        find_key( db, txn, query );
-        close_env( env, db );
-    }
     return 0;
 }
 
@@ -94,8 +89,10 @@ ups_txn_t* create_txn( ups_env_t* env )
 //
 //
 //
-void fill_db( ups_db_t* db, ups_txn_t* txn, unsigned int item_count )
+void fill_db( ups_db_t* db, ups_txn_t* txn )
 {
+    const unsigned int item_count = 50;
+
     for( unsigned int n = 0; n < item_count; n++ )
     {
         ups_key_t key = ups_make_key( &n, sizeof( n ) );
