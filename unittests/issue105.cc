@@ -102,5 +102,8 @@ int main()
     st = ups_db_close(db, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
 
+    st = ups_env_close( env, UPS_AUTO_CLEANUP );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_close" );
+
     return 0;
 }
