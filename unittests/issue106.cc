@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 #define EXPECT_TRUE( st, txt )     \
-if( !st )                          \
+if( !( st ) )                      \
 {                                  \
     std::cout << txt << std::endl; \
     exit( 1 );                     \

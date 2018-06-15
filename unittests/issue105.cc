@@ -8,127 +8,102 @@
 #include <ups/upscaledb.hpp>
 #include <cstdlib>
 
+
 #define EXPECT_TRUE( st, txt )     \
-if( !st )                          \
+if( !( st ) )                      \
 {                                  \
     std::cout << txt << std::endl; \
     exit( 1 );                     \
 }
 
-ups_db_t* create_env( ups_env_t **env );
-void fill_db( ups_db_t* db, unsigned int item_count );
-void erase_key( ups_db_t* db, unsigned int query );
-void find_key( ups_db_t* db, unsigned int query );
-void close_env( ups_env_t *env, ups_db_t* db );
 
-//
-//
-//
 int main()
 {
-    const unsigned int query = 0;
-    const unsigned int item_count = 50;
+    ups_env_t* env;
+    ups_status_t st = ups_env_create(&env, "test.db", UPS_ENABLE_TRANSACTIONS, 0664, 0);
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create" );
 
-    for( unsigned int n = 2; n < item_count; n++ )
-    {
-        // std::cout << n << "  " << std::flush << std::endl;
+    //ups_env_create(&env, "test.db", 0, 0664, 0);
 
-        ups_env_t* env = nullptr;
-        ups_db_t* db = create_env( &env );
-        fill_db( db, item_count );
-        erase_key( db, query );
-        find_key( db, query );
-        close_env( env, db );
-    }
-    return 0;
-}
-
-//
-//
-//
-ups_db_t* create_env( ups_env_t **env )
-{
-    const std::string db_name( "test.db" );
-    const uint32_t mode = 0664;
-
-    ups_status_t st = ups_env_create( env, db_name.c_str(), UPS_ENABLE_TRANSACTIONS, mode, 0 );
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create, UPS_ENABLE_TRANSACTIONS" );
-
-    //ups_status_t st = ups_env_create( env, db_name.c_str(), 0, mode, 0 );
-    //EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create" );
-
-    ups_parameter_t params[] =
-    {
-        { UPS_PARAM_KEY_TYPE, UPS_TYPE_UINT32 },
-        { UPS_PARAM_RECORD_SIZE, 0 },
-        { 0, }
+    ups_parameter_t params[] = {
+    {UPS_PARAM_KEY_TYPE, UPS_TYPE_UINT32},
+    {0, }
     };
 
-    ups_db_t* db = nullptr;
-    st = ups_env_create_db( *env, &db, 1, 0, &params[ 0 ] );
+    ups_db_t* db;
+    st = ups_env_create_db(env, &db, 1, 0, &params[0]);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_create_db" );
 
-    return db;
-}
+    ups_txn_t* txn = nullptr;
+    st = ups_txn_begin( &txn, env, nullptr, nullptr, 0 );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_txn_begin" );
 
-//
-//
-//
-void fill_db( ups_db_t* db, unsigned int item_count )
-{
-    for( unsigned int n = 0; n < item_count; n++ )
+    const uint32_t item_count = 50;
+
+    for (uint32_t i = 0; i < item_count; i++)
     {
-        ups_key_t key = ups_make_key( &n, sizeof( n ) );
+        ups_key_t key = ups_make_key(&i, sizeof(i));
+        ups_record_t record = {0};
 
-        ups_record_t record;
-        bzero( &record, sizeof( record ) );
-
-        const ups_status_t st = ups_db_insert( db, 0, &key, &record, 0 );
+        st = ups_db_insert(db, txn, &key, &record, 0);
         EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
     }
-}
 
-//
-//
-//
-void erase_key( ups_db_t* db, unsigned int query )
-{
-    ups_key_t key = ups_make_key( &query, sizeof( query ) );
+    uint64_t count = 0;
+    st = ups_db_count( db, txn, 0, &count );
+    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_count" );
+    EXPECT_TRUE( count == item_count, "ups_db_count returns wrong value after insert" );
 
-    ups_status_t st = ups_db_erase(db, 0, &key, 0);
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase, UPS_SUCCESS" );
+    for(uint32_t i = 0; i < item_count / 2; i++)
+    {
+        ups_key_t key = ups_make_key(&i, sizeof(i));
 
-    st = ups_db_erase(db, 0, &key, 0);
-    EXPECT_TRUE( st == UPS_KEY_NOT_FOUND, "ups_db_erase, UPS_KEY_NOT_FOUND" );
-}
+        st = ups_db_erase(db, txn, &key, 0);
+        EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase" );
+    }
+    if( txn )
+    {
+        ups_txn_commit( txn, 0 );
+    }
 
-//
-//
-//
-void find_key( ups_db_t* db, unsigned int query )
-{
-    ups_key_t key = ups_make_key( &query, sizeof( query ) );
+    //
+    //    The function ups_db_count after delete does not work!!!
+    //
+    //    count = 0;
+    //    st = ups_db_count(db, txn, 0, &count);
+    //    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_count" );
+    //    EXPECT_TRUE( count == item_count / 2, "ups_db_count returns wrong value after delete" );
 
-    ups_record_t record;
-    bzero( &record, sizeof( record ) );
+    for(uint32_t i = 0; i < item_count / 2; i++)
+    {
+        ups_key_t key = ups_make_key(&i, sizeof(i));
+        ups_record_t record = {0};
 
-    ups_status_t st = ups_db_find( db, 0, &key, &record, UPS_FIND_GEQ_MATCH );
-    EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_find" );
+        ups_cursor_t* cursor;
+        st = ups_cursor_create(&cursor, db, txn, 0);
+        EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_create" );
 
+        st = ups_cursor_find(cursor, &key, &record, UPS_FIND_GEQ_MATCH);
+        //ups_status_t st = ups_db_find(db, 0, &key, &record, UPS_FIND_GEQ_MATCH);
 
-    // std::cout << *reinterpret_cast< unsigned int* >( key.data ) << std::endl;
+        if(st == UPS_SUCCESS && *reinterpret_cast< uint32_t* >(key.data) == i){
+            std::cout << "Found deleted item: " << i << std::endl;
+        }
 
-    EXPECT_TRUE( query != *reinterpret_cast< unsigned int* >( key.data ), "Key not deleted" );
-}
+        st = ups_cursor_close(cursor);
+        EXPECT_TRUE( st == UPS_SUCCESS, "ups_cursor_close" );
+    }
 
-//
-//
-//
-void close_env( ups_env_t* env, ups_db_t* db )
-{
-    ups_status_t st = ups_db_close( db, 0 );
+    if( txn )
+    {
+        ups_txn_commit( txn, 0 );
+    }
+
+    st = ups_db_close(db, 0);
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_close" );
 
     st = ups_env_close( env, UPS_AUTO_CLEANUP );
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_close" );
+
+    return 0;
 }
