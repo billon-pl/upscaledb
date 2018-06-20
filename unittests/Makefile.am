@@ -1,5 +1,5 @@
-noinst_PROGRAMS = test recovery issue32 issue43 issue101 issue105 issue106 issue107 plugin
-noinst_BIN = test recovery issue32 issue43 issue101 issue105 issue106 issue107 plugin
+noinst_PROGRAMS = test recovery issue32 issue43 issue101 issue105 issue105simple issue105blob issue106 issue107 plugin
+noinst_BIN = test recovery issue32 issue43 issue101 issue105 issue105simple issue105blob issue106 issue107 plugin
 
 EXTRA_DIST      = recovery.pl valgrind.supp data/* plugin.cc
 
@@ -9,47 +9,47 @@ BOOST_FLAGS     = $(BOOST_SYSTEM_LDFLAGS) $(BOOST_THREAD_LDFLAGS) $(BOOST_FILESY
 AM_CPPFLAGS     = -I../include -I$(top_srcdir)/include -I../src -std=c++11
 
 test_SOURCES    = api110.cpp \
-			      approx.cpp \
-				  blob_manager.cpp \
-				  btree.cpp \
-				  btree_cursor.cpp \
-				  btree_default.cpp \
-				  btree_erase.cpp \
-				  btree_insert.cpp \
-				  btree_key.cpp \
-				  changeset.cpp \
-				  check.cpp \
-				  compression.cpp \
-				  cppapi.cpp \
-				  crc32.cpp \
-				  cursor1.cpp \
-				  cursor2.cpp \
-				  db.cpp \
-				  device.cpp \
-				  duplicates.cpp \
-				  env.cpp \
-				  fixture.hpp \
-				  journal.cpp \
-				  misc.cpp \
-				  os.cpp \
-				  os.hpp \
-				  page.cpp \
-				  page_manager.cpp \
-				  main.cpp \
-				  recordnumber.cpp \
-				  simd.cpp \
-				  txn.cpp \
-				  txn_cursor.cpp \
-				  upscaledb.cpp \
-				  uqi.cpp \
-				  zint32.cpp
+                  approx.cpp \
+                  blob_manager.cpp \
+                  btree.cpp \
+                  btree_cursor.cpp \
+                  btree_default.cpp \
+                  btree_erase.cpp \
+                  btree_insert.cpp \
+                  btree_key.cpp \
+                  changeset.cpp \
+                  check.cpp \
+                  compression.cpp \
+                  cppapi.cpp \
+                  crc32.cpp \
+                  cursor1.cpp \
+                  cursor2.cpp \
+                  db.cpp \
+                  device.cpp \
+                  duplicates.cpp \
+                  env.cpp \
+                  fixture.hpp \
+                  journal.cpp \
+                  misc.cpp \
+                  os.cpp \
+                  os.hpp \
+                  page.cpp \
+                  page_manager.cpp \
+                  main.cpp \
+                  recordnumber.cpp \
+                  simd.cpp \
+                  txn.cpp \
+                  txn_cursor.cpp \
+                  upscaledb.cpp \
+                  uqi.cpp \
+                  zint32.cpp
 
 recovery_SOURCES = recovery.cpp
 
 test_LDADD      = $(top_builddir)/src/.libs/libupscaledb.a \
-				  $(BOOST_LIBS) -lpthread -ldl
+                  $(BOOST_LIBS) -lpthread -ldl
 recovery_LDADD  = $(top_builddir)/src/.libs/libupscaledb.a \
-				  $(BOOST_LIBS) -lpthread -ldl
+                  $(BOOST_LIBS) -lpthread -ldl
 test_LDFLAGS    = $(BOOST_FLAGS)
 recovery_LDFLAGS= $(BOOST_FLAGS)
 
@@ -57,9 +57,9 @@ if ENABLE_REMOTE
 test_SOURCES   += remote.cpp
 AM_CPPFLAGS    += -DUPS_ENABLE_REMOTE
 test_LDADD     += $(top_builddir)/src/5server/.libs/libupsserver.a \
-				  -lprotobuf -ldl
+                  -lprotobuf -ldl
 recovery_LDADD += $(top_builddir)/src/5server/.libs/libupsserver.a \
-				  -lprotobuf -ldl
+                  -lprotobuf -ldl
 endif
 
 if ENABLE_ENCRYPTION
@@ -90,8 +90,8 @@ endif
 
 valgrind:
 	valgrind --suppressions=valgrind.supp --leak-check=full \
-			--num-callers=20 --show-reachable=yes \
-			--log-file=valgrind-out.txt ./test
+            --num-callers=20 --show-reachable=yes \
+            --log-file=valgrind-out.txt ./test
 
 test_recovery:
 	perl recovery.pl
@@ -107,6 +107,12 @@ issue101_LDADD   = $(top_builddir)/src/libupscaledb.la
 
 issue105_SOURCES = issue105.cc
 issue105_LDADD   = $(top_builddir)/src/libupscaledb.la
+
+issue105simple_SOURCES = issue105simple.cc
+issue105simple_LDADD   = $(top_builddir)/src/libupscaledb.la
+
+issue105blob_SOURCES = issue105blob.cc
+issue105blob_LDADD   = $(top_builddir)/src/libupscaledb.la
 
 issue106_SOURCES = issue106.cc
 issue106_LDADD   = $(top_builddir)/src/libupscaledb.la

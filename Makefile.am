@@ -42,14 +42,18 @@ html-dist: doc
 	tar cvzf upscaledb-html-documentation.$(VERSION).tar.gz documentation/html
 
 test:
-	cd unittests && make         \
-	             && ./test       \
-	             && ./issue32 -i \
-	             && ./issue32 -r \
-	             && ./issue43    \
-	             && ./issue101   \
-	             && ./issue106   \
-	             && ./issue107
+	cd unittests \
+             && make             \
+             && ./test           \
+             && ./issue32 -i     \
+             && ./issue32 -r     \
+             && ./issue43        \
+             && ./issue101       \
+             && ./issue105       \
+             && ./issue105blob   \
+             && ./issue105simple \
+             && ./issue106       \
+             && ./issue107
 if ENABLE_JAVA
 	cd java && make test
 endif
