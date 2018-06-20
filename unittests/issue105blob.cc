@@ -8,7 +8,16 @@
 #include <ups/upscaledb.hpp>
 #include <cstdlib>
 #include <vector>
+#include <random>
+#include <algorithm>
+#include <string>
+#include <utility>
+#include <limits>
+#include <map>
 
+//
+//
+//
 #define EXPECT_TRUE( st, txt )     \
 if( !( st ) )                      \
 {                                  \
@@ -16,23 +25,32 @@ if( !( st ) )                      \
     exit( 1 );                     \
 }
 
+
+//
+//
+//
+using DataType = std::map< std::string, std::string >;
+
+//
+//
+//
 ups_db_t* create_env( ups_env_t** env );
-void fill_db( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& data );
-void erase_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& query );
-void find_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& query );
+void fill_db( ups_db_t* db, ups_txn_t* txn, const DataType& data );
+void erase_key( ups_db_t* db, ups_txn_t* txn, const DataType& query );
+void find_key( ups_db_t* db, ups_txn_t* txn, const DataType& query );
 void close_env( ups_env_t *env, ups_db_t* db );
 ups_txn_t* create_txn( ups_env_t* env );
-
-std::vector< uint32_t > generate_data();
-std::vector< uint32_t > generate_query( const std::vector< uint32_t >& data );
+std::string get_random_string( std::size_t max_length );
+DataType generate_data();
+DataType generate_query( const DataType& data );
 
 //
 //
 //
 int main()
 {
-    const std::vector< uint32_t > data = generate_data();
-    const std::vector< uint32_t > query = generate_query( data );
+    const DataType data = generate_data();
+    const DataType query = generate_query( data );
 
     ups_env_t* env = nullptr;
     ups_db_t* db = create_env( &env );
@@ -96,14 +114,18 @@ ups_txn_t* create_txn( ups_env_t* env )
 //
 //
 //
-void fill_db( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& data )
+void fill_db( ups_db_t* db, ups_txn_t* txn, const DataType& data )
 {
-    for( uint32_t v : data )
-    {
-        // std::cout << "to insert: " << v << std::endl;
 
-        ups_key_t key = ups_make_key( &v, sizeof( v ) );
-        ups_record_t record = ups_make_record( nullptr, 0 );
+    for( auto v : data )
+    {
+        const std::string sk = v.first;
+        const std::string sr = v.second;
+
+        // std::cout << "to insert: " << sk << std::endl;
+
+        ups_key_t key = ups_make_key( (void*)sk.c_str(), (uint16_t)(sk.size() + 1) );
+        ups_record_t record = ups_make_record( (void*)sr.c_str(), (uint16_t)(sr.size() + 1) );
 
         const ups_status_t st = ups_db_insert( db, txn, &key, &record, 0 );
         EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_insert" );
@@ -118,14 +140,17 @@ void fill_db( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& data 
 //
 //
 //
-void erase_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& query )
+void erase_key( ups_db_t* db, ups_txn_t* txn, const DataType& query )
 {
 
-    for( uint32_t q : query )
+    for( auto q : query )
     {
+        const std::string sk = q.first;
+        // const std::string sr = q.second;
+
         // std::cout << "to erase: " << q << std::endl;
 
-        ups_key_t key = ups_make_key( &q, sizeof( q ) );
+        ups_key_t key = ups_make_key( (void*)sk.c_str(), (uint16_t)(sk.size() + 1) );
 
         ups_status_t st = ups_db_erase( db, txn, &key, 0 );
         EXPECT_TRUE( st == UPS_SUCCESS, "ups_db_erase, UPS_SUCCESS" );
@@ -143,13 +168,14 @@ void erase_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& que
 //
 //
 //
-void find_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& query )
+void find_key( ups_db_t* db, ups_txn_t* txn, const DataType& query )
 {
-    for( uint32_t q : query )
+    for( auto q : query )
     {
+        const std::string sk = q.first;
         // std::cout << "to find: " << q << std::endl;
 
-        ups_key_t key = ups_make_key( &q, sizeof( q ) );
+        ups_key_t key = ups_make_key( (void*)sk.c_str(), (uint16_t)(sk.size() + 1) );
 
         ups_record_t rec;
         bzero( &rec, sizeof( rec ) );
@@ -157,8 +183,9 @@ void find_key( ups_db_t* db, ups_txn_t* txn, const std::vector< uint32_t >& quer
         ups_status_t st = ups_db_find( db, txn, &key, &rec, UPS_FIND_GEQ_MATCH );
         if ( st == UPS_SUCCESS )
         {
-            const uint32_t key_data = *reinterpret_cast< uint32_t* >( key.data );
-            EXPECT_TRUE( q != key_data , "Key not deleted, B" );
+            const char* key_data = reinterpret_cast< char* >( key.data );
+            const std::string ret( key_data );
+            EXPECT_TRUE( sk != ret , "Key not deleted, B" );
         }
     }
 }
@@ -175,20 +202,35 @@ void close_env( ups_env_t* env, ups_db_t* db )
     EXPECT_TRUE( st == UPS_SUCCESS, "ups_env_close" );
 }
 
+
 //
 //
 //
-std::vector< uint32_t > generate_data()
+DataType generate_data()
 {
-    const std::size_t item_count = 100;
+    const std::size_t max_length_key = 200;
+    const std::size_t max_length_record = 15000;
 
-    std::vector< uint32_t > data;
-    data.reserve( item_count );
+    const std::size_t item_count = 10000;
 
-    for( std::size_t i = 0; i < item_count; i++ )
+    static_assert( max_length_key < std::numeric_limits< uint16_t >::max(), "Key too long" );
+    static_assert( max_length_record < std::numeric_limits< uint16_t >::max(), "Record too long" );
+
+    DataType data;
+
+    while( data.size() < item_count )
     {
-        data.push_back( i );
+        const std::string sk = get_random_string( max_length_key );
+        const std::string sr = get_random_string( max_length_record );
+
+        // std::cout << sk << std::endl;
+        // std::cout << sr << std::endl << std::endl;
+
+        data[ sk ] = sr;
     }
+    std::cout << "Item count: " << data.size() << std::endl;
+    std::cout << "Max key length: " << max_length_key << std::endl;
+    std::cout << "Max record length: " << max_length_record << std::endl;
 
     return data;
 }
@@ -196,18 +238,49 @@ std::vector< uint32_t > generate_data()
 //
 //
 //
-std::vector< uint32_t > generate_query( const std::vector< uint32_t >& data )
+DataType generate_query( const DataType& data )
 {
-    std::vector< uint32_t > query;
+    DataType query;
 
-    for( std::size_t i = 0; i < data.size(); i++ )
+    std::size_t i = 0;
+    for( auto v : data )
     {
         // take every second item
         if( i % 2 == 0 )
         {
-            query.push_back( data[ i ] );
+            query.insert( v );
         }
+        i++;
     }
     return query;
 
+}
+
+//
+//
+//
+std::string get_random_string( std::size_t max_length )
+{
+    const std::string alphabet( "0123456789"
+                                "abcdefghijklmnopqrstuvwxyz"
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ" );
+
+    std::random_device rd;
+    std::mt19937 g( rd() );
+    // std::mt19937 g( rand() );
+    std::uniform_int_distribution< std::size_t > pick( 0, alphabet.size() - 1 );
+
+
+    std::uniform_int_distribution< std::size_t > pick_length( 1, max_length + 1 );
+    std::string::size_type length = pick_length( g );
+    assert( length > 0 );
+    std::string s;
+    s.reserve( length );
+
+    while( length-- )
+    {
+        const char c = alphabet[ pick( g ) ];
+        s += c;
+    }
+    return s;
 }
